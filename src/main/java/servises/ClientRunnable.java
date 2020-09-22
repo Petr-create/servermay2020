@@ -1,5 +1,7 @@
 package servises;
 
+import dao.UserDao;
+import dao.UserDaoImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import model.User;
@@ -13,7 +15,9 @@ import java.net.Socket;
 public class ClientRunnable implements Runnable, Observer{
     private final Socket socket;
     private final Server server;
+    private  final UserDao userDao = new UserDaoImpl();
     private User user;
+
 
     @SneakyThrows
     @Override
@@ -27,15 +31,34 @@ public class ClientRunnable implements Runnable, Observer{
                 new BufferedReader(new InputStreamReader(socket.getInputStream()));
         String clientInput;
         while ((clientInput = readerFromClient.readLine()) != null) {
-            if (clientInput.startsWith("!@#$")) {
+            if (clientInput.startsWith("!@#$autho")) {
 
-                final String[] authorizationStrings = clientInput.substring(4).split(" : ");
+                final String[] authorizationStrings = clientInput.substring(9).split(" : ");
 
                 String login = authorizationStrings[0];
                 String password = authorizationStrings[1];
 
-                user = new User(login, password);
-                server.addObserver(this);
+                user = authorization(login, password);
+                if (user != null) {
+                    server.addObserver(this);
+                } else {
+                    notifyMe("Не правильное имя пользователя или пароль");
+                    notifyMe("401");
+                    socket.close();
+                    break;
+                }
+
+            } else if (clientInput.startsWith("!@#$reg")) {
+                final String[] checkinStrings = clientInput.substring(7).split(" : ");
+                String login = checkinStrings[0];
+                String password = checkinStrings[1];
+                user = authorization(login, password);
+                if (user == null){
+                    userDao.createRow(login, password);
+                    notifyMe("Новый User успешно зарегистрирован!");
+                } else {
+                    notifyMe("Пользователь с таким именем и паролем уже зарегистрирован!");
+                }
 
             } else {
                 System.out.println(user.getName() + " : " + clientInput);
@@ -43,6 +66,17 @@ public class ClientRunnable implements Runnable, Observer{
             }
         }
     }
+
+    public User authorization(String name, String password){
+        User user = userDao.findByName(name);
+        if(user != null){
+            if(user.getPassword().equals(password)){
+                return user;
+            }
+        }
+        return null;
+    }
+
 
     @SneakyThrows
     @Override

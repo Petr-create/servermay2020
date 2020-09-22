@@ -1,17 +1,18 @@
 package dao;
 
 import model.User;
+import utils.Props;
 
 import java.sql.*;
 
 public class UserDaoImpl implements UserDao{
 
-    public final static String URL = "jdbc:MySQL://localhost:3306/my_schema_eeexo?serverTimezone=UTC";
-    public final static String LOGIN = "root";
-    public final static String PASSWORD = "77177Lox68";
+    public final static String DB_URL = Props.getValue("db.url");
+    public final static String DB_LOGIN = Props.getValue("db.user");
+    public final static String DB_PASSWORD = Props.getValue("db.password");
 
     public Connection connectionWithDBMySQL() throws SQLException {
-        Connection con = DriverManager.getConnection(URL, LOGIN, PASSWORD);
+        Connection con = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
         return con;
     }
 
