@@ -55,9 +55,12 @@ public class ClientRunnable implements Runnable, Observer{
                 user = authorization(login, password);
                 if (user == null){
                     userDao.createRow(login, password);
+                    server.addObserver(this);
                     notifyMe("Новый User успешно зарегистрирован!");
                 } else {
                     notifyMe("Пользователь с таким именем и паролем уже зарегистрирован!");
+                    socket.close();
+                    break;
                 }
 
             } else {
