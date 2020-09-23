@@ -13,4 +13,5 @@ public interface UserDao {
     void deleteRowDB(int id);
     //Вывести все login и password БД
     void allRowDB();
+    User findNameAndPassword(String name, String password);
 }

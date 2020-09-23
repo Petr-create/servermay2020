@@ -52,7 +52,7 @@ public class ClientRunnable implements Runnable, Observer{
                 final String[] checkinStrings = clientInput.substring(7).split(" : ");
                 String login = checkinStrings[0];
                 String password = checkinStrings[1];
-                user = authorization(login, password);
+                user = registration(login, password);
                 if (user == null){
                     userDao.createRow(login, password);
                     server.addObserver(this);
@@ -76,6 +76,14 @@ public class ClientRunnable implements Runnable, Observer{
             if(user.getPassword().equals(password)){
                 return user;
             }
+        }
+        return null;
+    }
+
+    public User registration(String name, String password){
+        User user = userDao.findNameAndPassword(name, password);
+        if(user != null){
+            return user;
         }
         return null;
     }

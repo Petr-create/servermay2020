@@ -16,6 +16,27 @@ public class UserDaoImpl implements UserDao{
         return con;
     }
 
+
+    @Override
+    public User findNameAndPassword(String name, String password) {
+        try(Connection con = connectionWithDBMySQL()){
+            PreparedStatement stat = con.prepareStatement("SELECT login, password FROM my_schema_eeexo.users where login = ? and password = ?");
+            stat.setString(1, name);
+            stat.setString(2, password);
+            ResultSet resultSet = stat.executeQuery();
+            if(resultSet.next()){
+                String login = resultSet.getString("login");
+                String passwordUser = resultSet.getString("password");
+                System.out.println("Нашли пользователя: " + login + " " + passwordUser);
+                return new User(login, passwordUser);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
     @Override
     public User findByName(String name) {
 
